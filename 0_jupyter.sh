@@ -5,7 +5,7 @@
 #SBATCH --mail-type END,TIME_LIMIT_90,REQUEUE,INVALID_DEPEND
 #SBATCH --mail-user jihu6033@gmail.com
 #SBATCH -p RTX3090
-#SBATCH -w gpu31
+#SBATCH -w gpu30
 #SBATCH --gpus 1
 
 # ------------------------------------------------------------
@@ -24,11 +24,20 @@ RANDOM_PORT=8888  # 8000~8100 사이 포트
 ------------------------------------------------------------
 Docker 이미지 빌드
 ------------------------------------------------------------
-echo "[INFO] Building Docker image: ${DOCKER_IMAGE_NAME}"
-docker build -t ${DOCKER_IMAGE_NAME} -f ${DOCKERFILE_PATH}
-if [ $? -ne 0 ]; then
-    echo "[❌ ERROR] Docker build failed."
-    exit 1
+# 'docker images -q'는 이미지 ID만 반환합니다. 결과가 비어있으면("") 이미지가 없는 것입니다.
+if [[ "$(docker images -q ${DOCKER_IMAGE_NAME} 2> /dev/null)" == "" ]]; then
+    echo "[INFO] Image not found. Building Docker image: ${DOCKER_IMAGE_NAME}"
+    
+    # 주의: docker build 명령어 끝에 빌드 컨텍스트(경로)가 필요합니다. 
+    # 보통 Dockerfile이 있는 폴더나 현재 폴더(.)를 지정합니다. 아래에 ${BUILD_CONTEXT}를 추가했습니다.
+    docker build -t ${DOCKER_IMAGE_NAME} -f ${DOCKERFILE_PATH} ${BUILD_CONTEXT}
+    
+    if [ $? -ne 0 ]; then
+        echo "[❌ ERROR] Docker build failed."
+        exit 1
+    fi
+else
+    echo "[INFO] Image ${DOCKER_IMAGE_NAME} already exists. Skipping build."
 fi
 
 # ------------------------------------------------------------

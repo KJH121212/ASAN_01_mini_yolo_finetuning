@@ -1,0 +1,21 @@
+path: /workspace/nas203/ds_RehabilitationMedicineData/IDs/tojihoo/ASAN_01_mini_yolo_finetuning/yolo_dataset_test
+train: images/train
+val: images/val
+names:
+  0: person
+kpt_shape:
+- 12
+- 3
+flip_idx:
+- 1
+- 0
+- 3
+- 2
+- 5
+- 4
+- 7
+- 6
+- 9
+- 8
+- 11
+- 10
